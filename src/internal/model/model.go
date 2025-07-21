@@ -7,9 +7,9 @@ package model
 // 5. admin (bool)
 
 type Profile struct {
-	id       int
-	email    string
-	username string
-	password string
-	admin    bool
+	Id       int
+	Email    string
+	Username string
+	Password string
+	Admin    bool
 }
