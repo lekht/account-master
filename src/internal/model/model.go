@@ -7,9 +7,9 @@ package model
 // 5. admin (bool)
 
 type Profile struct {
-	Id       int
-	Email    string
-	Username string
-	Password string
-	Admin    bool
+	Id       int    `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Admin    bool   `json:"admin"`
 }
