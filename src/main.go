@@ -20,6 +20,12 @@ func init() {
 	}
 }
 
+// @title Account Master
+// @version 1.0
+// @decsription
+// @BasePath /
+
+// @securityDefinitions.basic BasicAuth
 func main() {
 	app.Run(&conf)
 }

@@ -1,0 +1,10 @@
+basePath: /
+info:
+  contact: {}
+  title: Account Master
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
