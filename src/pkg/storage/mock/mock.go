@@ -29,6 +29,7 @@ func New() (*Mock, error) {
 	return &m, nil
 }
 
+// TODO: dont return pass
 func (m *Mock) Users() ([]model.Profile, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
