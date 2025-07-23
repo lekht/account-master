@@ -9,6 +9,7 @@ import (
 
 	"github.com/lekht/account-master/src/config"
 	"github.com/lekht/account-master/src/internal/controllers"
+	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/server"
 	"github.com/lekht/account-master/src/pkg/storage"
 )
@@ -19,6 +20,16 @@ func Run(cfg *config.Config) {
 	storage, err := storage.New()
 	if err != nil {
 		log.Fatalf("failed to create new storage: %v", err)
+	}
+
+	// create main superuser with id=0
+	{
+		storage.CreateUser(model.Profile{
+			Email:    "admin@mail.com",
+			Username: "admin",
+			Password: "password",
+			Admin:    true,
+		})
 	}
 
 	router := controllers.New(storage)

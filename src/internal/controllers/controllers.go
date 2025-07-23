@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
-	swaggerFiles "github.com/swaggo/files"     // swagger embed files
+	swaggerfiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
@@ -36,21 +36,13 @@ func New(repo Repository) *Router {
 	r.router.Use(gin.Logger())
 	r.router.Use(gin.Recovery())
 
-	g := r.router.Group("/user")
-	{
-		g.POST("", r.createUser)
-		g.GET("", r.getUsers)
-	}
+	r.router.GET("/user", r.getUsers)
+	r.router.GET("/user/:id", r.getUserById)
+	r.router.POST("/user", basicAuthMiddleware(), r.createUser)
+	r.router.PUT("/user/:id", basicAuthMiddleware(), r.updateUserById)
+	r.router.DELETE("/user/:id", basicAuthMiddleware(), r.deleteUserById)
 
-	// reqire basic access auth
-	authGroup := g.Group("/:id", basicAuthMiddleware())
-	{
-		authGroup.GET("", r.getUserById)
-		authGroup.PUT("", r.updateUserById)
-		authGroup.DELETE("", r.deleteUserById)
-	}
-
-	r.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return &r
 }
@@ -59,6 +51,18 @@ func (r *Router) GetRouter() *gin.Engine {
 	return r.router
 }
 
+// createUser
+// @Summary Create User
+// @Description Create new user
+// @Security BasicAuth
+// @Accept  json
+// @Produce  json
+// @Param user body model.Profile true "Email, Username, Password, Admin"
+// @Success 201
+// @Failure 400
+// @Failure 409
+// @Header       all {string} string "header"
+// @Router /user [post]
 func (r *Router) createUser(c *gin.Context) {
 	var usr model.Profile
 
@@ -74,11 +78,21 @@ func (r *Router) createUser(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
+// getUsers
+// @Summary Get Users
+// @Description Get full users list
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 404
+// @Header       all {string} string "header"
+// @Router /user [get]
 func (r *Router) getUsers(c *gin.Context) {
 	users, err := r.repo.Users()
 	if err != nil {
@@ -94,6 +108,17 @@ func (r *Router) getUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
+// getUserById
+// @Summary Get User By ID
+// @Description Get specific user by ID
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Header       all {string} string "header"
+// @Router /user/{id} [get]
 func (r *Router) getUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -118,6 +143,19 @@ func (r *Router) getUserById(c *gin.Context) {
 	})
 }
 
+// updateUserById()
+// @Summary Update User
+// @Description Update user by ID
+// @Security BasicAuth
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param user body model.Profile true "at least one field is reqired"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Header       all {string} string "header"
+// @Router /user/{id} [put]
 func (r *Router) updateUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -144,6 +182,18 @@ func (r *Router) updateUserById(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteUserById()
+// @Summary Delete User
+// @Description Delete user by ID
+// @Security BasicAuth
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200
+// @Failure 400
+// @Failure 404
+// @Header       all {string} string "header"
+// @Router /user/{id} [delete]
 func (r *Router) deleteUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/lekht/account-master/src/config"
+	"github.com/lekht/account-master/src/docs"
 	"github.com/lekht/account-master/src/internal/app"
 )
 
@@ -22,10 +23,11 @@ func init() {
 
 // @title Account Master
 // @version 1.0
-// @decsription
+// @decsription CRUD account service
 // @BasePath /
-
 // @securityDefinitions.basic BasicAuth
 func main() {
+	docs.SwaggerInfo.BasePath = "/"
+
 	app.Run(&conf)
 }

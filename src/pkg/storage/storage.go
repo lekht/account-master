@@ -38,7 +38,7 @@ func New() (*Storage, error) {
 func (s *Storage) Users() ([]model.Profile, error) {
 	users, err := s.db.Users()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get users list from storage: %v", err)
+		return nil, fmt.Errorf("failed to get users list from storage: %w", err)
 	}
 
 	return users, nil
@@ -47,7 +47,7 @@ func (s *Storage) Users() ([]model.Profile, error) {
 func (s *Storage) CreateUser(p model.Profile) (int, error) {
 	id, err := s.db.CreateUser(p)
 	if err != nil {
-		return -1, fmt.Errorf("failed to create new user in storage: %v", err)
+		return -1, fmt.Errorf("failed to create new user in storage: %w", err)
 	}
 
 	return id, nil
@@ -56,7 +56,7 @@ func (s *Storage) CreateUser(p model.Profile) (int, error) {
 func (s *Storage) UserByID(id int) (model.Profile, error) {
 	usr, err := s.db.UserByID(id)
 	if err != nil {
-		return usr, fmt.Errorf("failed to get user by id from storage: %v", err)
+		return usr, fmt.Errorf("failed to get user by id from storage: %w", err)
 	}
 
 	return usr, nil
@@ -65,7 +65,7 @@ func (s *Storage) UserByID(id int) (model.Profile, error) {
 func (s *Storage) UpdateUser(id int, p model.Profile) error {
 	err := s.db.UpdateUser(id, p)
 	if err != nil {
-		return fmt.Errorf("failed to update user in storage: %v", err)
+		return fmt.Errorf("failed to update user in storage: %w", err)
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (s *Storage) UpdateUser(id int, p model.Profile) error {
 func (s *Storage) DeleteUser(id int) error {
 	err := s.db.DeleteUser(id)
 	if err != nil {
-		return fmt.Errorf("failed to delete user in storage: %v", err)
+		return fmt.Errorf("failed to delete user in storage: %w", err)
 	}
 
 	return nil
