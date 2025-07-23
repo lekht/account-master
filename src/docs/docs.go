@@ -14,7 +14,292 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {},
+    "paths": {
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get full users list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Create new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create User",
+                "parameters": [
+                    {
+                        "description": "Email, Username, Password, Admin",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Profile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get specific user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get User By ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Update user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update User",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "at least one field is reqired",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Profile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Delete user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete User",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "string": {
+                                "type": "string",
+                                "description": "header"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Profile": {
+            "type": "object",
+            "properties": {
+                "admin": {
+                    "type": "boolean"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
     "securityDefinitions": {
         "BasicAuth": {
             "type": "basic"

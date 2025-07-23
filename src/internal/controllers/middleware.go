@@ -1,44 +1,74 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lekht/account-master/src/pkg/storage/mock"
 )
 
-var superusers = gin.Accounts{
-	"su": "pwd",
-}
-
-func basicAuthMiddleware() gin.HandlerFunc {
-	fmt.Println("BasicAuth middleware triggered!")
+func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("BasicAuth HandlerFunc!")
-		user, password, ok := c.Request.BasicAuth()
-		log.Printf("basic auth: name=%s pdw=%s ok=%t", user, password, ok)
+		// 1. Получаем Basic Auth данные
+		username, password, ok := c.Request.BasicAuth()
 		if !ok {
 			c.Header("WWW-Authenticate", `Basic realm="Restricted"`)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "autentication required"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Authentication required",
+			})
 			return
 		}
 
-		pwd, ok := superusers[user]
+		// 2. Ищем пользователя по имени
+		user, err := r.repo.UserByName(username)
+		if err != nil {
+			if errors.Is(err, mock.ErrNoUsername) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "Invalid username or password",
+				})
+				return
+			}
+
+			log.Printf("Database error: %v", err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal server error",
+			})
+			return
+		}
+
+		// 3. Проверяем пароль (в реальном приложении используйте хеширование!)
+		if user.Password != password {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid username or password",
+			})
+			return
+		}
+
+		// 4. Сохраняем данные пользователя в контексте
+		c.Set("username", user.Username)
+		c.Set("isAdmin", user.Admin)
+
+		c.Next()
+	}
+}
+
+func isAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		fmt.Println("isAdminMiddleware")
+		isAdmin, ok := c.Get("isAdmin")
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 			return
 		}
 
-		if pwd != password {
-			log.Printf("basic auth: name=%s password=%s pwd=%s", user, password, pwd)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		if isAdmin.(bool) {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
 			return
 		}
 
-		// TODO: search through db by name. If ok -> add to hash
-
-		// c.Set("authUser", user)
 		c.Next()
 	}
 }

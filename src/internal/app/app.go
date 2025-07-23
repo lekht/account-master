@@ -11,30 +11,30 @@ import (
 	"github.com/lekht/account-master/src/internal/controllers"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/server"
-	"github.com/lekht/account-master/src/pkg/storage"
+	"github.com/lekht/account-master/src/pkg/storage/mock"
 )
 
 func Run(cfg *config.Config) {
 	log.Printf("config: %+v\n", *cfg)
 
-	storage, err := storage.New()
+	storage, err := mock.New()
 	if err != nil {
 		log.Fatalf("failed to create new storage: %v", err)
 	}
 
 	// create main superuser with id=0
-	{
-		storage.CreateUser(model.Profile{
-			Email:    "admin@mail.com",
-			Username: "admin",
-			Password: "password",
-			Admin:    true,
-		})
-	}
+	storage.CreateUser(model.Profile{
+		Email:    "admin@mail.com",
+		Username: "admin",
+		Password: "password",
+		Admin:    true,
+	})
+	user, _ := storage.UserByID(0)
+	log.Printf("User with id 0: %+v\n", user)
 
 	router := controllers.New(storage)
 
-	httpserver := server.New(router.GetRouter(), server.Adress(cfg.Server.Host, cfg.Server.Port))
+	httpserver := server.New(router.Router(), server.Adress(cfg.Server.Host, cfg.Server.Port))
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)

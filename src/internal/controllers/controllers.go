@@ -19,6 +19,7 @@ type Repository interface {
 	CreateUser(model.Profile) (int, error)
 	UpdateUser(int, model.Profile) error
 	DeleteUser(int) error
+	UserByName(string) (model.Profile, error)
 }
 
 type Router struct {
@@ -36,18 +37,21 @@ func New(repo Repository) *Router {
 	r.router.Use(gin.Logger())
 	r.router.Use(gin.Recovery())
 
-	r.router.GET("/user", r.getUsers)
-	r.router.GET("/user/:id", r.getUserById)
-	r.router.POST("/user", basicAuthMiddleware(), r.createUser)
-	r.router.PUT("/user/:id", basicAuthMiddleware(), r.updateUserById)
-	r.router.DELETE("/user/:id", basicAuthMiddleware(), r.deleteUserById)
+	authenticated := r.router.Group("/user", r.basicAuthMiddleware())
+	{
+		authenticated.GET("", r.getUsers)
+		authenticated.GET("/:id", r.getUserById)
+		authenticated.POST("", isAdminMiddleware(), r.createUser)
+		authenticated.PUT("/:id", isAdminMiddleware(), r.updateUserById)
+		authenticated.DELETE("/:id", isAdminMiddleware(), r.deleteUserById)
+	}
 
 	r.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return &r
 }
 
-func (r *Router) GetRouter() *gin.Engine {
+func (r *Router) Router() *gin.Engine {
 	return r.router
 }
 
@@ -73,7 +77,7 @@ func (r *Router) createUser(c *gin.Context) {
 
 	id, err := r.repo.CreateUser(usr)
 	if err != nil {
-		if errors.Is(err, mock.ERROR_USER_EXISTS) {
+		if errors.Is(err, mock.ErrUserExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 			return
 		}
@@ -87,6 +91,7 @@ func (r *Router) createUser(c *gin.Context) {
 // getUsers
 // @Summary Get Users
 // @Description Get full users list
+// @Security BasicAuth
 // @Accept  json
 // @Produce  json
 // @Success 200
@@ -111,6 +116,7 @@ func (r *Router) getUsers(c *gin.Context) {
 // getUserById
 // @Summary Get User By ID
 // @Description Get specific user by ID
+// @Security BasicAuth
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
@@ -128,7 +134,7 @@ func (r *Router) getUserById(c *gin.Context) {
 	}
 
 	u, err := r.repo.UserByID(id)
-	if errors.Is(err, mock.ERROR_NO_USER_ID) {
+	if errors.Is(err, mock.ErrNoUserID) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	} else if err != nil {
@@ -171,7 +177,7 @@ func (r *Router) updateUserById(c *gin.Context) {
 	}
 
 	err = r.repo.UpdateUser(id, u)
-	if errors.Is(err, mock.ERROR_NO_USER_ID) {
+	if errors.Is(err, mock.ErrNoUserID) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	} else if err != nil {
@@ -203,7 +209,7 @@ func (r *Router) deleteUserById(c *gin.Context) {
 	}
 
 	err = r.repo.DeleteUser(id)
-	if errors.Is(err, mock.ERROR_NO_USER_ID) {
+	if errors.Is(err, mock.ErrNoUserID) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	} else if err != nil {

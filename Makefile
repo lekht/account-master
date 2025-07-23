@@ -8,3 +8,4 @@ run:
 
 stop:
 	docker compose down -v
+

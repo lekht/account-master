@@ -1,9 +1,190 @@
 basePath: /
+definitions:
+  model.Profile:
+    properties:
+      admin:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   title: Account Master
   version: "1.0"
-paths: {}
+paths:
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Get full users list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            string:
+              description: header
+              type: string
+        "404":
+          description: Not Found
+          headers:
+            string:
+              description: header
+              type: string
+      security:
+      - BasicAuth: []
+      summary: Get Users
+    post:
+      consumes:
+      - application/json
+      description: Create new user
+      parameters:
+      - description: Email, Username, Password, Admin
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.Profile'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          headers:
+            string:
+              description: header
+              type: string
+        "400":
+          description: Bad Request
+          headers:
+            string:
+              description: header
+              type: string
+        "409":
+          description: Conflict
+          headers:
+            string:
+              description: header
+              type: string
+      security:
+      - BasicAuth: []
+      summary: Create User
+  /user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            string:
+              description: header
+              type: string
+        "400":
+          description: Bad Request
+          headers:
+            string:
+              description: header
+              type: string
+        "404":
+          description: Not Found
+          headers:
+            string:
+              description: header
+              type: string
+      security:
+      - BasicAuth: []
+      summary: Delete User
+    get:
+      consumes:
+      - application/json
+      description: Get specific user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            string:
+              description: header
+              type: string
+        "400":
+          description: Bad Request
+          headers:
+            string:
+              description: header
+              type: string
+        "404":
+          description: Not Found
+          headers:
+            string:
+              description: header
+              type: string
+      security:
+      - BasicAuth: []
+      summary: Get User By ID
+    put:
+      consumes:
+      - application/json
+      description: Update user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: at least one field is reqired
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.Profile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            string:
+              description: header
+              type: string
+        "400":
+          description: Bad Request
+          headers:
+            string:
+              description: header
+              type: string
+        "404":
+          description: Not Found
+          headers:
+            string:
+              description: header
+              type: string
+      security:
+      - BasicAuth: []
+      summary: Update User
 securityDefinitions:
   BasicAuth:
     type: basic
