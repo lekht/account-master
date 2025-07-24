@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lekht/account-master/src/internal/hash"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
 )
 
@@ -21,11 +22,13 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		pwdHash, err := HashPassword(password)
+		pwdHash, err := hash.HashPassword(string(password))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "something go wrong"})
 			return
 		}
+		log.Printf("==== middleware %s %s", username, password)
+		log.Printf("==== middleware %s", pwdHash)
 
 		user, err := r.repo.UserByName(username)
 		if errors.Is(err, mock.ErrNoUsername) {
@@ -40,7 +43,16 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if user.Password != pwdHash {
+		isSame, err := hash.CheckPassword(password, user.Password)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		// if user.Password != pwdHash {
+		if !isSame {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid username or password",
 			})

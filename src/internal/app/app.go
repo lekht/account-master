@@ -9,6 +9,7 @@ import (
 
 	"github.com/lekht/account-master/src/config"
 	"github.com/lekht/account-master/src/internal/controllers"
+	"github.com/lekht/account-master/src/internal/hash"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/server"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
@@ -19,13 +20,23 @@ func Run(cfg *config.Config) {
 
 	storage := mock.New()
 
-	// create main superuser with id=0
-	storage.CreateUser(model.Profile{
-		Email:    "a@mail.com",
-		Username: "admin",
-		Password: "aaa",
-		Admin:    true,
-	})
+	// create admin
+	{
+		hash, err := hash.HashPassword(cfg.Admin.Password)
+		if err != nil {
+			log.Panicf("failed to hash admin pwd: %v\n", err)
+		}
+
+		err = storage.CreateUser(model.Profile{
+			Email:    cfg.Admin.Email,
+			Username: cfg.Admin.Username,
+			Password: hash,
+			Admin:    cfg.Admin.Admin,
+		})
+		if err != nil {
+			log.Panicf("failed to create admin: %v\n", err)
+		}
+	}
 
 	router := controllers.New(storage)
 

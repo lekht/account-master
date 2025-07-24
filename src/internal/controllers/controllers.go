@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
+	"github.com/lekht/account-master/src/internal/hash"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
 	swaggerfiles "github.com/swaggo/files"     // swagger embed files
@@ -82,7 +83,7 @@ func (r *Router) createUser(c *gin.Context) {
 		return
 	}
 
-	pwdHash, err := HashPassword(usr.Password)
+	pwdHash, err := hash.HashPassword(usr.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "something go wrong"})
 		return

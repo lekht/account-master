@@ -1,3 +1,9 @@
 server:
   host: "localhost"
   port: 8080
+
+superuser:
+  email: "admin@mail.com"
+  username: "admin"
+  password: "aaa"
+  admin: true

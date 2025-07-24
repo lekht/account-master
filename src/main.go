@@ -19,7 +19,7 @@ var conf config.Config
 func main() {
 	docs.SwaggerInfo.BasePath = "/"
 
-	path := flag.String("config", "", "path to config file")
+	path := flag.String("config", "./config.yaml", "path to config file")
 	flag.Parse()
 
 	if *path != "" {
