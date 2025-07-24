@@ -2,7 +2,6 @@ package mock
 
 import (
 	"errors"
-	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -15,7 +14,6 @@ var (
 	ErrNoUsername = errors.New("no user with this username")
 )
 
-// TODO: add map[username]id (more optimized)
 type Mock struct {
 	users map[uuid.UUID]model.Profile
 
@@ -129,9 +127,7 @@ func (m *Mock) UserByName(name string) (model.Profile, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	log.Println("==== name ", name)
 	for _, user := range m.users {
-		log.Printf("==== profile: %+v\n", user)
 		if user.Username == name {
 			return user, nil
 		}

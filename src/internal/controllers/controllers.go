@@ -82,6 +82,14 @@ func (r *Router) createUser(c *gin.Context) {
 		return
 	}
 
+	pwdHash, err := HashPassword(usr.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "something go wrong"})
+		return
+	}
+
+	usr.Password = pwdHash
+
 	err = r.repo.CreateUser(*usr)
 	if err != nil {
 		if errors.Is(err, mock.ErrUserExists) {

@@ -21,6 +21,12 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		pwdHash, err := HashPassword(password)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "something go wrong"})
+			return
+		}
+
 		user, err := r.repo.UserByName(username)
 		if errors.Is(err, mock.ErrNoUsername) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -34,8 +40,7 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// TODO: hash
-		if user.Password != password {
+		if user.Password != pwdHash {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid username or password",
 			})
