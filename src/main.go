@@ -22,14 +22,8 @@ func main() {
 	path := flag.String("config", "./config.yaml", "path to config file")
 	flag.Parse()
 
-	if *path != "" {
-		if err := config.Load(*path, &conf); err != nil {
-			log.Fatalf("failed to load config: %v\n", err)
-		}
-	} else {
-		if err := config.Load("./config.yaml", &conf); err != nil {
-			log.Fatalf("failed to load config: %v\n", err)
-		}
+	if err := config.Load(*path, &conf); err != nil {
+		log.Fatalf("failed to load config: %v\n", err)
 	}
 
 	app.Run(&conf)

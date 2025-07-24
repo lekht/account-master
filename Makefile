@@ -1,11 +1,16 @@
-all: run
+all: clean build run
 
 fastrun:
 	go run src/main.go --config config.yaml
 
-run:
-	docker compose up --build -d
+build:
+	mkdir ./build/
+	go build -o build/app src/main.go
 
-stop:
-	docker compose down -v
+clean: 
+	rm -rf ./build
+	go clean
+
+run:
+	./build/app
 

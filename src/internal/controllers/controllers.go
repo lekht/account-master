@@ -112,7 +112,7 @@ func (r *Router) createUser(c *gin.Context) {
 //	@Security		BasicAuth
 //	@Accept			json
 //	@Produce		json
-//	@Return json
+//	@Return			json
 //	@Success		200
 //	@Failure		404
 //	@Router			/user [get]
@@ -151,7 +151,7 @@ func (r *Router) getUsers(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"User ID"
-//	@Return json
+//	@Return			json
 //	@Success		200
 //	@Failure		400
 //	@Failure		404
@@ -187,7 +187,7 @@ func (r *Router) getUserById(c *gin.Context) {
 //	@Security		BasicAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path	string				true	"User ID"
+//	@Param			id		path	string			true	"User ID"
 //	@Param			user	body	AccountRequest	true	"request body"
 //	@Success		200
 //	@Failure		400
