@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/google/uuid"
 	"github.com/lekht/account-master/src/config"
 	"github.com/lekht/account-master/src/internal/controllers"
 	"github.com/lekht/account-master/src/internal/model"
@@ -29,7 +30,7 @@ func Run(cfg *config.Config) {
 		Password: "password",
 		Admin:    true,
 	})
-	user, _ := storage.UserByID(0)
+	user, _ := storage.UserByID(uuid.New())
 	log.Printf("User with id 0: %+v\n", user)
 
 	router := controllers.New(storage)

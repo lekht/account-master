@@ -3,22 +3,21 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
 	swaggerfiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
-// TODO: create by name search for auth
 type Repository interface {
 	Users() ([]model.Profile, error)
-	UserByID(int) (model.Profile, error)
-	CreateUser(model.Profile) (int, error)
-	UpdateUser(int, model.Profile) error
-	DeleteUser(int) error
+	UserByID(uuid.UUID) (model.Profile, error)
+	CreateUser(model.Profile) error
+	UpdateUser(uuid.UUID, model.Profile) error
+	DeleteUser(uuid.UUID) error
 	UserByName(string) (model.Profile, error)
 }
 
@@ -75,7 +74,7 @@ func (r *Router) createUser(c *gin.Context) {
 		return
 	}
 
-	id, err := r.repo.CreateUser(usr)
+	err := r.repo.CreateUser(usr)
 	if err != nil {
 		if errors.Is(err, mock.ErrUserExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
@@ -85,7 +84,7 @@ func (r *Router) createUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"id": id})
+	c.Status(http.StatusCreated)
 }
 
 // getUsers
@@ -127,7 +126,7 @@ func (r *Router) getUsers(c *gin.Context) {
 // @Router /user/{id} [get]
 func (r *Router) getUserById(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
@@ -164,7 +163,7 @@ func (r *Router) getUserById(c *gin.Context) {
 // @Router /user/{id} [put]
 func (r *Router) updateUserById(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return
@@ -202,7 +201,7 @@ func (r *Router) updateUserById(c *gin.Context) {
 // @Router /user/{id} [delete]
 func (r *Router) deleteUserById(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 		return

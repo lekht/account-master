@@ -12,7 +12,6 @@ import (
 
 func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Получаем Basic Auth данные
 		username, password, ok := c.Request.BasicAuth()
 		if !ok {
 			c.Header("WWW-Authenticate", `Basic realm="Restricted"`)
@@ -22,24 +21,20 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// 2. Ищем пользователя по имени
 		user, err := r.repo.UserByName(username)
-		if err != nil {
-			if errors.Is(err, mock.ErrNoUsername) {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "Invalid username or password",
-				})
-				return
-			}
-
-			log.Printf("Database error: %v", err)
+		if errors.Is(err, mock.ErrNoUsername) {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid username or password",
+			})
+			return
+		} else if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal server error",
 			})
 			return
 		}
 
-		// 3. Проверяем пароль (в реальном приложении используйте хеширование!)
+		// TODO: hash
 		if user.Password != password {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid username or password",
@@ -47,7 +42,6 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// 4. Сохраняем данные пользователя в контексте
 		c.Set("username", user.Username)
 		c.Set("isAdmin", user.Admin)
 
@@ -64,7 +58,8 @@ func isAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if isAdmin.(bool) {
+		log.Println("is admin: ", isAdmin.(bool))
+		if !isAdmin.(bool) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
 			return
 		}

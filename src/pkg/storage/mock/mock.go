@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log"
 	"reflect"
-	"sort"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/lekht/account-master/src/internal/model"
 )
 
@@ -16,18 +16,16 @@ var (
 	ErrNoUsername = errors.New("no user with this username")
 )
 
-// TODO: add map[username]id
+// TODO: add map[username]id (more optimized)
 type Mock struct {
-	users  map[int]model.Profile
-	nextId int
+	users map[uuid.UUID]model.Profile
 
 	mu sync.RWMutex
 }
 
 func New() (*Mock, error) {
 	m := Mock{
-		users:  make(map[int]model.Profile),
-		nextId: 0,
+		users: make(map[uuid.UUID]model.Profile),
 	}
 
 	return &m, nil
@@ -46,34 +44,39 @@ func (m *Mock) Users() ([]model.Profile, error) {
 		return users, nil
 	}
 
-	sort.Slice(users, func(i, j int) bool {
-		return users[i].Id < users[j].Id
-	})
-
 	return users, nil
 }
 
-func (m *Mock) CreateUser(p model.Profile) (int, error) {
+func (m *Mock) CreateUser(p model.Profile) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	for _, usr := range m.users {
 		if p.Username == usr.Username {
-			var currentId int = m.nextId
-
-			p.Id = currentId
-			m.users[currentId] = p
-
-			m.nextId++
-
-			return currentId, nil
+			return ErrUserExists
 		}
 	}
 
-	return 0, ErrUserExists
+	for {
+		p.Id = uuid.New()
+		if _, ok := m.users[p.Id]; ok {
+			continue
+		} else {
+			break
+		}
+	}
+
+	m.users[p.Id] = p
+	for _, usr := range m.users {
+		if p.Username == usr.Username {
+			return ErrUserExists
+		}
+	}
+
+	return nil
 }
 
-func (m *Mock) UserByID(id int) (model.Profile, error) {
+func (m *Mock) UserByID(id uuid.UUID) (model.Profile, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -85,7 +88,7 @@ func (m *Mock) UserByID(id int) (model.Profile, error) {
 	return user, nil
 }
 
-func (m *Mock) UpdateUser(id int, p model.Profile) error {
+func (m *Mock) UpdateUser(id uuid.UUID, p model.Profile) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -113,7 +116,7 @@ func (m *Mock) UpdateUser(id int, p model.Profile) error {
 	return nil
 }
 
-func (m *Mock) DeleteUser(id int) error {
+func (m *Mock) DeleteUser(id uuid.UUID) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
