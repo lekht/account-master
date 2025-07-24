@@ -24,22 +24,10 @@
                 "summary": "Get Users",
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "OK"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 }
             },
@@ -64,7 +52,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Profile"
+                            "$ref": "#/definitions/controllers.AccountRequest"
                         }
                     }
                 ],
@@ -116,7 +104,7 @@
                 "summary": "Get User By ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -125,31 +113,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Bad Request"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 }
             },
@@ -169,19 +139,19 @@
                 "summary": "Update User",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "at least one field is reqired",
+                        "description": "request body",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Profile"
+                            "$ref": "#/definitions/controllers.AccountRequest"
                         }
                     }
                 ],
@@ -231,7 +201,7 @@
                 "summary": "Delete User",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -271,7 +241,7 @@
         }
     },
     "definitions": {
-        "model.Profile": {
+        "controllers.AccountRequest": {
             "type": "object",
             "properties": {
                 "admin": {
@@ -279,9 +249,6 @@
                 },
                 "email": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "password": {
                     "type": "string"

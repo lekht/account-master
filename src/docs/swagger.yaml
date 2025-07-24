@@ -1,13 +1,11 @@
 basePath: /
 definitions:
-  model.Profile:
+  controllers.AccountRequest:
     properties:
       admin:
         type: boolean
       email:
         type: string
-      id:
-        type: integer
       password:
         type: string
       username:
@@ -28,16 +26,8 @@ paths:
       responses:
         "200":
           description: OK
-          headers:
-            string:
-              description: header
-              type: string
         "404":
           description: Not Found
-          headers:
-            string:
-              description: header
-              type: string
       security:
       - BasicAuth: []
       summary: Get Users
@@ -51,7 +41,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.Profile'
+          $ref: '#/definitions/controllers.AccountRequest'
       produces:
       - application/json
       responses:
@@ -86,7 +76,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -120,28 +110,16 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
-          headers:
-            string:
-              description: header
-              type: string
         "400":
           description: Bad Request
-          headers:
-            string:
-              description: header
-              type: string
         "404":
           description: Not Found
-          headers:
-            string:
-              description: header
-              type: string
       security:
       - BasicAuth: []
       summary: Get User By ID
@@ -154,13 +132,13 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
-      - description: at least one field is reqired
+        type: string
+      - description: request body
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/model.Profile'
+          $ref: '#/definitions/controllers.AccountRequest'
       produces:
       - application/json
       responses:

@@ -32,22 +32,10 @@ const docTemplate = `{
                 "summary": "Get Users",
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "OK"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 }
             },
@@ -72,7 +60,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Profile"
+                            "$ref": "#/definitions/controllers.AccountRequest"
                         }
                     }
                 ],
@@ -124,7 +112,7 @@ const docTemplate = `{
                 "summary": "Get User By ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -133,31 +121,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Bad Request"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "string": {
-                                "type": "string",
-                                "description": "header"
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 }
             },
@@ -177,19 +147,19 @@ const docTemplate = `{
                 "summary": "Update User",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "at least one field is reqired",
+                        "description": "request body",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Profile"
+                            "$ref": "#/definitions/controllers.AccountRequest"
                         }
                     }
                 ],
@@ -239,7 +209,7 @@ const docTemplate = `{
                 "summary": "Delete User",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -279,7 +249,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Profile": {
+        "controllers.AccountRequest": {
             "type": "object",
             "properties": {
                 "admin": {
@@ -287,9 +257,6 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "password": {
                     "type": "string"

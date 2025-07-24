@@ -21,11 +21,11 @@ func init() {
 	}
 }
 
-// @title Account Master
-// @version 1.0
-// @decsription CRUD account service
-// @BasePath /
-// @securityDefinitions.basic BasicAuth
+// @title						Account Master
+// @version					1.0
+// @decsription				CRUD account service
+// @BasePath					/
+// @securityDefinitions.basic	BasicAuth
 func main() {
 	docs.SwaggerInfo.BasePath = "/"
 

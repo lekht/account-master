@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 	"github.com/lekht/account-master/src/internal/model"
 	"github.com/lekht/account-master/src/pkg/storage/mock"
@@ -55,26 +56,33 @@ func (r *Router) Router() *gin.Engine {
 }
 
 // createUser
-// @Summary Create User
-// @Description Create new user
-// @Security BasicAuth
-// @Accept  json
-// @Produce  json
-// @Param user body model.Profile true "Email, Username, Password, Admin"
-// @Success 201
-// @Failure 400
-// @Failure 409
-// @Header       all {string} string "header"
-// @Router /user [post]
+//
+//	@Summary		Create User
+//	@Description	Create new user
+//	@Security		BasicAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body	AccountRequest	true	"Email, Username, Password, Admin"
+//	@Success		201
+//	@Failure		400
+//	@Failure		409
+//	@Header			all	{string}	string	"header"
+//	@Router			/user [post]
 func (r *Router) createUser(c *gin.Context) {
-	var usr model.Profile
+	var req AccountRequest
 
-	if err := c.ShouldBindJSON(&usr); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong json"})
 		return
 	}
 
-	err := r.repo.CreateUser(usr)
+	usr, err := requestToProfile(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong json"})
+		return
+	}
+
+	err = r.repo.CreateUser(*usr)
 	if err != nil {
 		if errors.Is(err, mock.ErrUserExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
@@ -88,15 +96,17 @@ func (r *Router) createUser(c *gin.Context) {
 }
 
 // getUsers
-// @Summary Get Users
-// @Description Get full users list
-// @Security BasicAuth
-// @Accept  json
-// @Produce  json
-// @Success 200
-// @Failure 404
-// @Header       all {string} string "header"
-// @Router /user [get]
+//
+//	@Summary		Get Users
+//	@Description	Get full users list
+//	@Header			all	{string}	string	"header"
+//	@Security		BasicAuth
+//	@Accept			json
+//	@Produce		json
+//	@Return json
+//	@Success		200
+//	@Failure		404
+//	@Router			/user [get]
 func (r *Router) getUsers(c *gin.Context) {
 	users, err := r.repo.Users()
 	if err != nil {
@@ -109,21 +119,34 @@ func (r *Router) getUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": users})
+	responses := make([]AccountResponse, 0, len(users))
+	for _, u := range users {
+		resp, err := profileToResponse(&u)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		responses = append(responses, *resp)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": responses})
 }
 
 // getUserById
-// @Summary Get User By ID
-// @Description Get specific user by ID
-// @Security BasicAuth
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Header       all {string} string "header"
-// @Router /user/{id} [get]
+//
+//	@Summary		Get User By ID
+//	@Description	Get specific user by ID
+//	@Header			all	{string}	string	"header"
+//	@Security		BasicAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"User ID"
+//	@Return json
+//	@Success		200
+//	@Failure		400
+//	@Failure		404
+//	@Router			/user/{id} [get]
 func (r *Router) getUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := uuid.Parse(idParam)
@@ -149,18 +172,19 @@ func (r *Router) getUserById(c *gin.Context) {
 }
 
 // updateUserById()
-// @Summary Update User
-// @Description Update user by ID
-// @Security BasicAuth
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID"
-// @Param user body model.Profile true "at least one field is reqired"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Header       all {string} string "header"
-// @Router /user/{id} [put]
+//
+//	@Summary		Update User
+//	@Description	Update user by ID
+//	@Security		BasicAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path	string				true	"User ID"
+//	@Param			user	body	AccountRequest	true	"request body"
+//	@Success		200
+//	@Failure		400
+//	@Failure		404
+//	@Header			all	{string}	string	"header"
+//	@Router			/user/{id} [put]
 func (r *Router) updateUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := uuid.Parse(idParam)
@@ -169,13 +193,15 @@ func (r *Router) updateUserById(c *gin.Context) {
 		return
 	}
 
-	var u model.Profile
-	if err := c.ShouldBindJSON(&u); err != nil {
+	var req AccountRequest
+	if err = c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
 	}
 
-	err = r.repo.UpdateUser(id, u)
+	u, err := requestToProfile(&req)
+
+	err = r.repo.UpdateUser(id, *u)
 	if errors.Is(err, mock.ErrNoUserID) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -188,17 +214,18 @@ func (r *Router) updateUserById(c *gin.Context) {
 }
 
 // deleteUserById()
-// @Summary Delete User
-// @Description Delete user by ID
-// @Security BasicAuth
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID"
-// @Success 200
-// @Failure 400
-// @Failure 404
-// @Header       all {string} string "header"
-// @Router /user/{id} [delete]
+//
+//	@Summary		Delete User
+//	@Description	Delete user by ID
+//	@Security		BasicAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"User ID"
+//	@Success		200
+//	@Failure		400
+//	@Failure		404
+//	@Header			all	{string}	string	"header"
+//	@Router			/user/{id} [delete]
 func (r *Router) deleteUserById(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := uuid.Parse(idParam)

@@ -3,7 +3,6 @@ package mock
 import (
 	"errors"
 	"log"
-	"reflect"
 	"sync"
 
 	"github.com/google/uuid"
@@ -59,19 +58,12 @@ func (m *Mock) CreateUser(p model.Profile) error {
 
 	for {
 		p.Id = uuid.New()
-		if _, ok := m.users[p.Id]; ok {
-			continue
-		} else {
+		if _, ok := m.users[p.Id]; !ok {
 			break
 		}
 	}
 
 	m.users[p.Id] = p
-	for _, usr := range m.users {
-		if p.Username == usr.Username {
-			return ErrUserExists
-		}
-	}
 
 	return nil
 }
@@ -98,17 +90,20 @@ func (m *Mock) UpdateUser(id uuid.UUID, p model.Profile) error {
 	}
 
 	// updates only non default value
-	src := reflect.ValueOf(&p).Elem()
-	dst := reflect.ValueOf(&usr).Elem()
+	if p.Email != "" {
+		usr.Email = p.Email
+	}
 
-	for i := 0; i < src.NumField(); i++ {
-		srcField := src.Field(i)
-		if !srcField.IsZero() {
-			dstField := dst.Field(i)
-			if dstField.CanSet() {
-				dstField.Set(srcField)
-			}
-		}
+	if p.Username != "" {
+		usr.Username = p.Username
+	}
+
+	if p.Password != "" {
+		usr.Password = p.Password
+	}
+
+	if p.Admin != usr.Admin {
+		usr.Admin = p.Admin
 	}
 
 	m.users[id] = usr

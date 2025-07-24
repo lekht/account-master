@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/google/uuid"
 	"github.com/lekht/account-master/src/config"
 	"github.com/lekht/account-master/src/internal/controllers"
 	"github.com/lekht/account-master/src/internal/model"
@@ -25,13 +24,11 @@ func Run(cfg *config.Config) {
 
 	// create main superuser with id=0
 	storage.CreateUser(model.Profile{
-		Email:    "admin@mail.com",
+		Email:    "a@mail.com",
 		Username: "admin",
-		Password: "password",
+		Password: "aaa",
 		Admin:    true,
 	})
-	user, _ := storage.UserByID(uuid.New())
-	log.Printf("User with id 0: %+v\n", user)
 
 	router := controllers.New(storage)
 
