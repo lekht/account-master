@@ -20,15 +20,15 @@ make all
 
 ### Доступные эндпоинты
 ```yaml
-GET    /api/v1/users      - Список пользователей
-POST   /api/v1/users      - Создание пользователя
-GET    /api/v1/users/{id} - Получить пользователя
-PUT    /api/v1/users/{id} - Обновить пользователя
-DELETE /api/v1/users/{id} - Удалить пользователя
-
-
+GET    /users      - Список пользователей
+POST   /users      - Создание пользователя
+GET    /users/{id} - Получить пользователя
+PUT    /users/{id} - Обновить пользователя
+DELETE /users/{id} - Удалить пользователя
+```
 
 ### Структура проекта
+```bash
 .
 ├── config.yaml
 ├── go.mod
@@ -62,4 +62,4 @@ DELETE /api/v1/users/{id} - Удалить пользователя
             └── mock
                 ├── mock.go
                 └── mock_test.go
-
+```
