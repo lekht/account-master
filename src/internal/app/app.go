@@ -17,10 +17,7 @@ import (
 func Run(cfg *config.Config) {
 	log.Printf("config: %+v\n", *cfg)
 
-	storage, err := mock.New()
-	if err != nil {
-		log.Fatalf("failed to create new storage: %v", err)
-	}
+	storage := mock.New()
 
 	// create main superuser with id=0
 	storage.CreateUser(model.Profile{
@@ -40,12 +37,13 @@ func Run(cfg *config.Config) {
 	select {
 	case s := <-interrupt:
 		log.Println("app - Run - signal: " + s.String())
+		break
 	case err := <-httpserver.Notify():
 		log.Println(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
 	}
 
 	// Shutdown
-	err = httpserver.Shutdown()
+	err := httpserver.Shutdown()
 	if err != nil {
 		log.Println(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}

@@ -11,16 +11,6 @@ import (
 
 var conf config.Config
 
-func init() {
-	path := flag.String("config", "", "path to config file")
-	flag.Parse()
-
-	err := config.Load(*path, &conf)
-	if err != nil {
-		log.Fatalf("failed to load config: %v\n", err)
-	}
-}
-
 // @title						Account Master
 // @version					1.0
 // @decsription				CRUD account service
@@ -28,6 +18,19 @@ func init() {
 // @securityDefinitions.basic	BasicAuth
 func main() {
 	docs.SwaggerInfo.BasePath = "/"
+
+	path := flag.String("config", "", "path to config file")
+	flag.Parse()
+
+	if *path != "" {
+		if err := config.Load(*path, &conf); err != nil {
+			log.Fatalf("failed to load config: %v\n", err)
+		}
+	} else {
+		if err := config.Load("./config.yaml", &conf); err != nil {
+			log.Fatalf("failed to load config: %v\n", err)
+		}
+	}
 
 	app.Run(&conf)
 }

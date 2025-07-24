@@ -2,6 +2,7 @@ package mock
 
 import (
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/google/uuid"
@@ -20,12 +21,12 @@ type Mock struct {
 	mu sync.RWMutex
 }
 
-func New() (*Mock, error) {
+func New() *Mock {
 	m := Mock{
 		users: make(map[uuid.UUID]model.Profile),
 	}
 
-	return &m, nil
+	return &m
 }
 
 func (m *Mock) Users() ([]model.Profile, error) {
@@ -40,6 +41,10 @@ func (m *Mock) Users() ([]model.Profile, error) {
 	if len(users) == 0 {
 		return users, nil
 	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Username < users[j].Username
+	})
 
 	return users, nil
 }
