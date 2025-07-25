@@ -4,7 +4,6 @@ fastrun:
 	go run src/main.go --config config.yaml
 
 build:
-	mkdir ./build/
 	go build -o build/app src/main.go
 
 clean: 

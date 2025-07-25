@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,14 +19,6 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 			})
 			return
 		}
-
-		pwdHash, err := hash.HashPassword(string(password))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "something go wrong"})
-			return
-		}
-		log.Printf("==== middleware %s %s", username, password)
-		log.Printf("==== middleware %s", pwdHash)
 
 		user, err := r.repo.UserByName(username)
 		if errors.Is(err, mock.ErrNoUsername) {
@@ -68,14 +58,12 @@ func (r *Router) basicAuthMiddleware() gin.HandlerFunc {
 
 func isAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("isAdminMiddleware")
 		isAdmin, ok := c.Get("isAdmin")
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 			return
 		}
 
-		log.Println("is admin: ", isAdmin.(bool))
 		if !isAdmin.(bool) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
 			return

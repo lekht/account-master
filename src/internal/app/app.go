@@ -16,8 +16,6 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	log.Printf("config: %+v\n", *cfg)
-
 	storage := mock.New()
 
 	// create admin
